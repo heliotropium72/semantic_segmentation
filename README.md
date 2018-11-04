@@ -14,6 +14,10 @@ Make sure you have the following is installed:
 ##### Dataset
 Download the [Kitti Road dataset](http://www.cvlibs.net/datasets/kitti/eval_road.php) from [here](http://www.cvlibs.net/download.php?file=data_road.zip).  Extract the dataset in the `data` folder.  This will create the folder `data_road` with all the training a test images.
 
+Inside the workspace bash console, use
+wget <dir>
+tar xvf {file.zip} -C /dest/directory/
+
 ### Start
 ##### Implement
 Implement the code in the `main.py` module indicated by the "TODO" comments.
