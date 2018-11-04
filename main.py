@@ -19,7 +19,7 @@ else:
 
 # Hyperparameters
 # Some of these values have to be feed to the right placeholder of the vgg model
-EPOCHS = 5
+EPOCHS = 25
 BATCH_SIZE = 16
 LEARNING_RATE = 0.0008
 KEEP_PROB = 0.7
@@ -110,6 +110,18 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     return logits, training_operation, cross_entropy_loss
 tests.test_optimize(optimize)
 
+def evaluate(nn_last_layer, correct_label,, num_classes):
+    tf_metric, tf_metric_update = tf.metrics.mean_iou(correct_label,
+                                                      nn_last_layer,
+                                                      num_classes,
+                                                      name="IOU")
+    #inside seesion
+    #feed_dict={tf_label: labels[i], tf_prediction: predictions[i]}
+    #session.run(tf_metric_update, feed_dict=feed_dict)
+    # Calculate the score
+    #score = session.run(tf_metric)
+    #print("[TF] SCORE: ", score)
+    return tf_metric
 
 def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_loss, input_image,
              correct_label, keep_prob, learning_rate):
@@ -126,17 +138,21 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     :param keep_prob: TF Placeholder for dropout keep probability (from vgg model, needed for feed_dict)
     :param learning_rate: TF Placeholder for learning rate (from vgg model, needed for feed_dict)
     """
+
     # TODO: Implement function
     for epoch in range(epochs):
         for images, label in get_batches_fn(batch_size):
+            feed_dict = {input_image: images,
+                         correct_label: label,
+                         keep_prob: KEEP_PROB,
+                         learning_rate: LEARNING_RATE}
             # Training
-            sess.run(train_op, feed_dict={input_image: images, correct_label: label,
-                                          keep_prob: KEEP_PROB, learning_rate: LEARNING_RATE})
+            sess.run(train_op, feed_dict=feed_dict)
             # Evaluation
-            loss = sess.run(cross_entropy_loss, feed_dict={input_image: images, correct_label: label,
-                                          keep_prob: KEEP_PROB, learning_rate: LEARNING_RATE})
-        print("EPOCH {}/{} ...".format(epoch+1, epochs) + \
-              "Cross entropy loss = {:.3f}".format(loss))
+            loss = sess.run(cross_entropy_loss, feed_dict=feed_dict)
+            iou = sees.run(evaluate())
+        print("EPOCH {}/{} : ".format(epoch+1, epochs) + \
+              "Cross entropy loss (last batch) = {:.3f}".format(loss))
 tests.test_train_nn(train_nn)
 
 
@@ -144,7 +160,7 @@ def run():
     num_classes = 2
     image_shape = (160, 576)
     data_dir = '/data'
-    runs_dir = '/runs'
+    runs_dir = './runs'
     tests.test_for_kitti_dataset(data_dir)
     
     # Download pretrained vgg model
@@ -183,7 +199,7 @@ def run():
                  correct_label=correct_label, keep_prob=keep_prob, learning_rate=learning_rate)
         
         # Save inference data using helper.save_inference_samples
-        #helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
+        helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
 
         # OPTIONAL: Apply the trained model to a video
         print('All finished.')
