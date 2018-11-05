@@ -27,7 +27,8 @@ The model was trained testing different sets of hyperparameters (epochs, batch s
 In the end, 
 
 ### Result
-![alt text][result]
+
+![alt text](runs/result.gif)
 
 The loss was decresing.
 
