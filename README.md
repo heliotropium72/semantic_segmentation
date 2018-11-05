@@ -24,6 +24,7 @@ Additionally, two skip layers are included. These add pixelwise the information 
 
 ### Training
 The model was trained testing different sets of hyperparameters (epochs, batch size, dropout, learning rate, regularization).
+The training took about 30 min inside the udacity workspace.
 
 ### Result
 
@@ -38,18 +39,18 @@ The model was trained testing different sets of hyperparameters (epochs, batch s
 | CEL batch     | 0.164         | 0.176 |
 | CEL total     | -             | 3.65 |
 
-Result in run/1541429909.976964
-Epoch 30: single batch CEL=0.164, generally decreasing
-
 First run
+
 ![alt text](runs/result2.gif)
 
 In the first run, only the cross entropy loss of the last batch of images was reported to the console. It did not decrease constantly but with an overall trend. That can be expected for a random sample.
 
  Second run
+ 
  ![alt text](runs/result3.gif)
  
- The total cross entropy loss (summed over all batches) decreased monotonicly.
+ The total cross entropy loss (summed over all batches) decreased monotonicaly.
+ The model fails to predict the correct label when the street is illuminated non-homogeneously.
  
  ### Tips from Udacity
 - The link for the frozen `VGG16` model is hardcoded into `helper.py`.  The model can be found [here](https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/vgg.zip).
