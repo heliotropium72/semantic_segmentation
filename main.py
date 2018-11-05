@@ -19,11 +19,11 @@ else:
 
 # Hyperparameters
 # Some of these values have to be feed to the right placeholder of the vgg model
-EPOCHS = 25
+EPOCHS = 20
 BATCH_SIZE = 15
-LEARNING_RATE = 0.001
-KEEP_PROB = 0.5
-REG = 1e-4
+LEARNING_RATE = 0.0008
+KEEP_PROB = 0.7
+REG = 1e-3
 
 def load_vgg(sess, vgg_path):
     """
@@ -142,6 +142,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
 
     # TODO: Implement function
     for epoch in range(epochs):
+        total_loss = 0
         for images, label in get_batches_fn(batch_size):
             feed_dict = {input_image: images,
                          correct_label: label,
@@ -151,8 +152,10 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
             sess.run(train_op, feed_dict=feed_dict)
             # Evaluation
             loss = sess.run(cross_entropy_loss, feed_dict=feed_dict)
+            total_loss += loss
             #iou = sess.run(evaluate())
         print("EPOCH {}/{} : ".format(epoch+1, epochs) + \
+              "Cross entropy loss = {:.3f}".format(total_loss) + \
               "Cross entropy loss (last batch) = {:.3f}".format(loss))
 tests.test_train_nn(train_nn)
 
@@ -210,17 +213,17 @@ def make_movie():
     runs_dir = './runs'
     from glob import glob
     from os.path import join
-    filenames = glob(join(runs_dir, '1541351859.982951', '*.png'))
+    filenames = glob(join(runs_dir, '1541432389.5504768', '*.png'))
     filenames.sort()
 
     # Create video
     import imageio
-    with imageio.get_writer(join(runs_dir, 'result.gif'), mode='I') as writer:
+    with imageio.get_writer(join(runs_dir, 'result3.gif'), mode='I') as writer:
         for filename in filenames:
             image = imageio.imread(filename)
             writer.append_data(image)
         
 if __name__ == '__main__':
-    run()
+    #run()
     
-    #make_movie()
+    make_movie()

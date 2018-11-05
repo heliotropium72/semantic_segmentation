@@ -24,14 +24,32 @@ Additionally, two skip layers are included. These add pixelwise the information 
 
 ### Training
 The model was trained testing different sets of hyperparameters (epochs, batch size, dropout, learning rate, regularization).
-In the end, 
 
 ### Result
 
-![alt text](runs/result.gif)
+| Parameter     | First run     | Second run  |
+| ------------- |:-------------:| :-----:|
+| Folder        | [here](run/1541429909.976964) | [here](run/1541432389.5504768)|
+| Epochs        | 30            | 20 |
+| Batch size    | 15            | 15 |
+| Learning rate | 0.001         |  0.0008 |
+| Dropout       | 0.5           | 0.7 |
+| Regularizatioin | 1e-4        | 1e-3 |
+| CEL batch     | 0.164         | 0.176 |
+| CEL total     | -             | 3.65 |
 
-The loss was decresing.
+Result in run/1541429909.976964
+Epoch 30: single batch CEL=0.164, generally decreasing
 
+First run
+![alt text](runs/result2.gif)
+
+In the first run, only the cross entropy loss of the last batch of images was reported to the console. It did not decrease constantly but with an overall trend. That can be expected for a random sample.
+
+ Second run
+ ![alt text](runs/result3.gif)
+ 
+ The total cross entropy loss (summed over all batches) decreased monotonicly.
  
  ### Tips from Udacity
 - The link for the frozen `VGG16` model is hardcoded into `helper.py`.  The model can be found [here](https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/vgg.zip).
