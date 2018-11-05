@@ -20,9 +20,10 @@ else:
 # Hyperparameters
 # Some of these values have to be feed to the right placeholder of the vgg model
 EPOCHS = 25
-BATCH_SIZE = 16
-LEARNING_RATE = 0.0008
-KEEP_PROB = 0.7
+BATCH_SIZE = 15
+LEARNING_RATE = 0.001
+KEEP_PROB = 0.5
+REG = 1e-4
 
 def load_vgg(sess, vgg_path):
     """
@@ -59,7 +60,7 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     :return: The Tensor for the last layer of output
     """
     # Regularization to avoid overfitting
-    reg = tf.contrib.layers.l2_regularizer(1e-3)
+    reg = tf.contrib.layers.l2_regularizer(REG)
     # Padding "same" is crucial to get same size
     #encoder
     # Layer 7
@@ -110,7 +111,7 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     return logits, training_operation, cross_entropy_loss
 tests.test_optimize(optimize)
 
-def evaluate(nn_last_layer, correct_label,, num_classes):
+def evaluate(nn_last_layer, correct_label, num_classes):
     tf_metric, tf_metric_update = tf.metrics.mean_iou(correct_label,
                                                       nn_last_layer,
                                                       num_classes,
@@ -150,7 +151,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
             sess.run(train_op, feed_dict=feed_dict)
             # Evaluation
             loss = sess.run(cross_entropy_loss, feed_dict=feed_dict)
-            iou = sees.run(evaluate())
+            #iou = sess.run(evaluate())
         print("EPOCH {}/{} : ".format(epoch+1, epochs) + \
               "Cross entropy loss (last batch) = {:.3f}".format(loss))
 tests.test_train_nn(train_nn)
@@ -204,5 +205,22 @@ def run():
         # OPTIONAL: Apply the trained model to a video
         print('All finished.')
 
+def make_movie():
+    # Produce a little movie
+    runs_dir = './runs'
+    from glob import glob
+    from os.path import join
+    filenames = glob(join(runs_dir, '1541351859.982951', '*.png'))
+    filenames.sort()
+
+    # Create video
+    import imageio
+    with imageio.get_writer(join(runs_dir, 'result.gif'), mode='I') as writer:
+        for filename in filenames:
+            image = imageio.imread(filename)
+            writer.append_data(image)
+        
 if __name__ == '__main__':
     run()
+    
+    #make_movie()
