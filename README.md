@@ -36,12 +36,12 @@ The final chosen parameters were
 | ------------- |:-------------:| :-----:|
 | Epochs        | 30            | the loss did not change anymore (NN has converged) |
 | Batch size    | 3             | Small batch sizes generalize better but cause longer training time. Here due to the small amount of training images, a number between 2-4 still results in resonable training times under 1 hour.|
-| Learning rate | 1e-4          |   |
+| Learning rate | 1e-4          | comparable small due to small batch size  |
 | Dropout       | 0.7           |  |
-| Regularization | 1e-3        | comparable small due to small batch size, no jumping of the loss was observed (no overfitting) |
+| Regularization | 1e-3        |  |
 | Std deviation | 1e-2          | |
 
-During training the combined loss from cross entropy and regularization is minimised using the Adam optimizer. The training took about 30 min inside the udacity workspace.
+During training the combined loss from cross entropy and regularization is minimised using the Adam optimizer. The training took about 60 min inside the udacity workspace.
 
 ### Result
 
