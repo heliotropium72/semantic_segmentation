@@ -19,11 +19,12 @@ else:
 
 # Hyperparameters
 # Some of these values have to be feed to the right placeholder of the vgg model
-EPOCHS = 20
-BATCH_SIZE = 15
-LEARNING_RATE = 0.0008
+EPOCHS = 30
+BATCH_SIZE = 2
+LEARNING_RATE = 1e-4
 KEEP_PROB = 0.7
-REG = 1e-3
+REG = 1e-3 # Strength of L2 regularization (punishs if one parameter gets much more used than others)
+STD = 0.01 # Standard deviation for weight initialisation (normal distribution aroud zero with width STD)
 
 def load_vgg(sess, vgg_path):
     """
@@ -61,32 +62,39 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     """
     # Regularization to avoid overfitting
     reg = tf.contrib.layers.l2_regularizer(REG)
+    # Weight initialisation of new layer to introduce asymetry to the learning process
+    init=tf.truncated_normal_initializer(stddev=STD)
     # Padding "same" is crucial to get same size
-    #encoder
+
     # Layer 7
     #1x1 convolution
     conv_1x1 = tf.layers.conv2d(vgg_layer7_out, num_classes, 1,
                                 padding='same',
-                                kernel_regularizer=reg)
+                                kernel_regularizer=reg,
+                                kernel_initializer=init)
     # transpose convolution
     output = tf.layers.conv2d_transpose(conv_1x1, num_classes, 4, 2, padding='same',
-                                        kernel_regularizer=reg)
+                                        kernel_regularizer=reg,
+                                        kernel_initializer=init)
     
     # Add some skip layers
     # Layer 4
     l4_conv_1x1 = tf.layers.conv2d(vgg_layer4_out, num_classes, 1, padding='same',
-                                   kernel_regularizer=reg)
+                                   kernel_regularizer=reg,
+                                   kernel_initializer=init)
     output = tf.add(output, l4_conv_1x1)
     output = tf.layers.conv2d_transpose(output, num_classes, 4, 2, padding='same', 
-                                        kernel_regularizer=reg)
+                                        kernel_regularizer=reg,
+                                        kernel_initializer=init)
     
     # Layer 3
     l3_conv_1x1 = tf.layers.conv2d(vgg_layer3_out, num_classes, 1, padding='same',
-                                   kernel_regularizer=reg)
+                                   kernel_regularizer=reg,
+                                   kernel_initializer=init)
     output = tf.add(output, l3_conv_1x1)
     output = tf.layers.conv2d_transpose(output, num_classes, 16, 8, padding='same', 
-                                kernel_regularizer=reg)
-    
+                                        kernel_regularizer=reg,
+                                        kernel_initializer=init)
     return output
 tests.test_layers(layers)
 
@@ -100,18 +108,20 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     :param num_classes: Number of classes to classify
     :return: Tuple of (logits, train_op, cross_entropy_loss)
     """
-    # TODO: Implement function
     logits = tf.reshape(nn_last_layer, (-1, num_classes))
     labels = tf.reshape(correct_label, (-1, num_classes))
     cross_entropy_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=labels))
+    # Minimize cross entropy and the l2 regularization defined in the graph
+    total_loss = cross_entropy_loss + tf.losses.get_regularization_loss()
     # optimizer operations
-    loss_operation = tf.reduce_mean(cross_entropy_loss)
+    loss_operation = tf.reduce_mean(total_loss)
     optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE)
     training_operation = optimizer.minimize(loss_operation)
     return logits, training_operation, cross_entropy_loss
 tests.test_optimize(optimize)
 
 def evaluate(nn_last_layer, correct_label, num_classes):
+    """ This is not yet used """
     tf_metric, tf_metric_update = tf.metrics.mean_iou(correct_label,
                                                       nn_last_layer,
                                                       num_classes,
@@ -155,8 +165,8 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
             total_loss += loss
             #iou = sess.run(evaluate())
         print("EPOCH {}/{} : ".format(epoch+1, epochs) + \
-              "Cross entropy loss = {:.3f}".format(total_loss) + \
-              "Cross entropy loss (last batch) = {:.3f}".format(loss))
+              "Total loss = {:.2f}, ".format(total_loss) + \
+              "batch loss = {:.3f}".format(loss))
 tests.test_train_nn(train_nn)
 
 
@@ -213,17 +223,16 @@ def make_movie():
     runs_dir = './runs'
     from glob import glob
     from os.path import join
-    filenames = glob(join(runs_dir, '1541432389.5504768', '*.png'))
+    filenames = glob(join(runs_dir, '1541861859.5053282', '*.png'))
     filenames.sort()
 
     # Create video
     import imageio
-    with imageio.get_writer(join(runs_dir, 'result3.gif'), mode='I') as writer:
+    with imageio.get_writer(join(runs_dir, 'result.gif'), mode='I') as writer:
         for filename in filenames:
             image = imageio.imread(filename)
             writer.append_data(image)
         
 if __name__ == '__main__':
-    #run()
-    
-    make_movie()
+    run()
+    #make_movie()
