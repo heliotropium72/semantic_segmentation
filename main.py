@@ -20,7 +20,7 @@ else:
 # Hyperparameters
 # Some of these values have to be feed to the right placeholder of the vgg model
 EPOCHS = 30
-BATCH_SIZE = 2
+BATCH_SIZE = 3
 LEARNING_RATE = 1e-4
 KEEP_PROB = 0.7
 REG = 1e-3 # Strength of L2 regularization (punishs if one parameter gets much more used than others)
@@ -223,7 +223,7 @@ def make_movie():
     runs_dir = './runs'
     from glob import glob
     from os.path import join
-    filenames = glob(join(runs_dir, '1541861859.5053282', '*.png'))
+    filenames = glob(join(runs_dir, '1541959209.7537029', '*.png'))
     filenames.sort()
 
     # Create video
@@ -234,5 +234,5 @@ def make_movie():
             writer.append_data(image)
         
 if __name__ == '__main__':
-    run()
-    #make_movie()
+    #run()
+    make_movie()
